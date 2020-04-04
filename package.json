@@ -1,0 +1,19 @@
+{
+  "name": "opennet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "cross-fetch": "^3.0.4",
+    "dotenv": "^8.2.0",
+    "golos-classic-js": "^0.7.12",
+    "iconv-lite": "^0.5.1",
+    "md5": "^2.2.1",
+    "pg": "^8.0.0",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.21.6",
+    "sequelize-cli": "^5.5.1",
+    "xml2js": "^0.4.23"
+  }
+}
