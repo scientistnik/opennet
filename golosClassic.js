@@ -1,27 +1,9 @@
 import golos from "golos-classic-js";
 import { GOLOS_CLASSIC_POSTING_KEY } from "./env.js";
+import { translateTitle, html2markdown } from "./utils.js";
 
 //golos.config.set("websocket", "wss://api.golos.blckchnd.com/ws");
 golos.config.set("websocket", "wss://api.aleksw.space/ws");
-
-const translateTitle = (rusTitle) => {
-  var result = rusTitle.toLowerCase();
-  var rus = "щ   ш  ч  ц  ю  я  ё  ж  ъ   ы  э  а б в г д е з и й к л м н о п р с т у ф х ь".split(
-      / +/g
-    ),
-    eng = "shh  sh  ch cz yu ya yo zh zch y  e  a b v g d e z i j k l m n o p r s t u f x b".split(
-      / +/g
-    );
-
-  rus.forEach((l, index) => {
-    result = result.replace(new RegExp(l, "g"), eng[index]);
-  });
-
-  result = result.replace(/[ \.]/g, "-");
-  result = result.replace(/[,!]/g, "");
-
-  return result;
-};
 
 export const createPost = async ({ title, body }) => {
   /**
@@ -37,10 +19,10 @@ export const createPost = async ({ title, body }) => {
    */
   var wif = GOLOS_CLASSIC_POSTING_KEY;
   var parentAuthor = "";
-  var parentPermlink = "opensource";
+  var parentPermlink = "Технологии";
   var author = "opennetru";
   var permlink = translateTitle(title);
-  body = `<html>${body}</html>`;
+  body = html2markdown(body); //`<html>${body}</html>`;
 
   let imgUrl = body.match(/<img [^>]*src="([^\s]*)" /);
   const headerImage =
@@ -49,7 +31,14 @@ export const createPost = async ({ title, body }) => {
 
   var jsonMetadata = JSON.stringify({
     format: "html",
-    tags: ["opennet", "ru--novosti", "it"],
+    tags: [
+      "opennet",
+      "ru--novosti",
+      "it",
+      "opensource",
+      "Компьютеры",
+      "Другое",
+    ],
     image: [headerImage],
   });
 
@@ -117,4 +106,8 @@ export const createComment = () => {
       } else console.error(err);
     }
   );
+};
+
+export default {
+  createPost,
 };
