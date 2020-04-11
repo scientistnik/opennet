@@ -19,32 +19,25 @@ export const createPost = async ({ title, body }) => {
    */
   var wif = GOLOS_CLASSIC_POSTING_KEY;
   var parentAuthor = "";
-  var parentPermlink = "Технологии";
+  var parentPermlink = "ru--tekhnologii";
   var author = "opennetru";
   var permlink = translateTitle(title);
-  body = html2markdown(body); //`<html>${body}</html>`;
 
   let imgUrl = body.match(/<img [^>]*src="([^\s]*)" /);
   const headerImage =
     (imgUrl && imgUrl[1]) ||
     "https://images.golos.io/DQmZBFzVTV1NVX5kpLSY7iNjmni4jXkEg2tpo3LkfoYhGFA/image.png";
 
+  body = html2markdown(body);
+
   var jsonMetadata = JSON.stringify({
-    format: "html",
-    tags: [
-      "opennet",
-      "ru--novosti",
-      "it",
-      "opensource",
-      "Компьютеры",
-      "Другое",
-    ],
+    format: "markdown",
+    tags: ["opennet", "ru--novosti", "it", "opensource"],
     image: [headerImage],
   });
 
   console.log("url", headerImage);
 
-  //throw new Error("Hello");
   return new Promise((resolve, reject) => {
     golos.broadcast.comment(
       wif,
@@ -55,57 +48,17 @@ export const createPost = async ({ title, body }) => {
       title,
       body,
       jsonMetadata,
-      function (err, result) {
-        if (!err) {
+      (err, result) => {
+        if (err != undefined) reject(err);
+        else
           resolve({
             block: result.ref_block_num,
             prefix: result.ref_block_prefix,
             date: result.expiration,
           });
-        } else {
-          reject(err);
-        }
       }
     );
   });
-};
-
-export const createComment = () => {
-  /**
-   * comment() add a comment
-   * @param {Base58} wif - private posting key
-   * @param {String} parentAuthor - for add a comment, author of the post
-   * @param {String} parentPermlink - for add a comment, url-address of the post
-   * @param {String} author - author of the comment
-   * @param {String} permlink - unique url-address of the comment
-   * @param {String} title - for create a comment, empty field
-   * @param {String} body - text of the comment
-   * @param {String} jsonMetadata - meta-data of the post (images etc.)
-   */
-  var wif = "5K...";
-  var parentAuthor = "epexa";
-  var parentPermlink = "test-url";
-  var author = "epexa";
-  var permlink = "re-" + parentAuthor + "-" + parentPermlink + "-" + Date.now(); // re-epexa-test-url-1517333064308
-  var title = "";
-  var body = "hi!";
-  var jsonMetadata = "{}";
-  golos.broadcast.comment(
-    wif,
-    parentAuthor,
-    parentPermlink,
-    author,
-    permlink,
-    title,
-    body,
-    jsonMetadata,
-    function (err, result) {
-      //console.log(err, result);
-      if (!err) {
-        console.log("comment", result);
-      } else console.error(err);
-    }
-  );
 };
 
 export default {

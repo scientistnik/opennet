@@ -1,12 +1,12 @@
 import steem from "steem";
 import { STEEM_ACTIVE_CREATOR_KEY, STEEM_POSTING_KEY } from "./env.js";
-import { translateTitle } from "./utils.js";
+import { translateTitle, html2markdown } from "./utils.js";
 
 steem.api.setOptions({ url: "https://api.steemit.com" });
 
-steem.api.getConfig(function (err, result) {
-  //console.log(err, result);
-});
+//steem.api.getConfig(function (err, result) {
+//console.log(err, result);
+//});
 
 export const createAccount = (name, pass) => {
   //BUTT.addEventListener("click", function (event) {
@@ -88,20 +88,21 @@ export const createPost = ({ title, body }) => {
   var parentPermlink = "ru";
   var author = "opennet";
   var permlink = translateTitle(title);
-  body = `<html>${body}</html>`;
 
   let imgUrl = body.match(/<img [^>]*src="([^\s]*)" /);
   const headerImage =
     (imgUrl && imgUrl[1]) ||
     "https://cdn.steemitimages.com/DQmYJLKd4o4nvfNW3XfPWRZx5fKA9bzBiDWZoiHJ3aSGPyo/image.png";
 
+  body = html2markdown(body);
+
   var jsonMetadata = JSON.stringify({
     format: "html",
-    tags: ["#ru", "opennet", "it", "news", "opensource"],
+    tags: ["opennet", "it", "news", "opensource"],
     image: [headerImage],
   });
 
-  console.log("url", headerImage, permlink);
+  console.log("url", headerImage);
 
   return new Promise((resolve, reject) => {
     steem.broadcast.comment(
@@ -113,8 +114,7 @@ export const createPost = ({ title, body }) => {
       title,
       body,
       jsonMetadata,
-      function (err, result) {
-        console.log(err, result);
+      (err, result) => {
         if (err != undefined) reject(err);
         else
           resolve({
@@ -131,6 +131,3 @@ export default {
   createPost,
   createAccount,
 };
-
-//5216559139 RC
-//2327423524 RC, needs 5214661307 RC

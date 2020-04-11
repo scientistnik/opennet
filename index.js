@@ -5,70 +5,67 @@ import golos from "./golosClassic.js";
 import steem from "./steem.js";
 //import cyber from "./cyberway/index.js";
 
-const cycle = (Post) => async () => {
+const cycle = fun => async () => {
+  const Post = store.Post;
   const news = await getNews();
-  let count = 1;
-  for (const item of news) {
-    let { title, description, link } = item;
-    title = title[0];
-    description = description[0];
-    link = link[0];
-    //console.log(description);
 
-    const hash = md5(description);
+  let { title, description, link } = news[1];
+  let body = description[0];
 
-    let post = await Post.findOne({ where: { link } });
+  title = title[0];
+  link = link[0];
 
-    if (post == undefined) {
-      post = await Post.create({ link, body: hash });
-    }
+  const hash = md5(body);
 
-    if (post.golos_classic == undefined) {
-      try {
-        let data = await golos.createPost({ title, body: description });
-        if (data != undefined) {
-          post.golos_classic = JSON.stringify(data);
-          await post.save();
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
+  let post = await Post.findOne({ where: { link } });
 
-    if (post.steem == undefined) {
-      try {
-        //let data = await steem.createPost({ title, body: description });
-        //if (data != undefined) {
-        //  post.steem = JSON.stringify(data);
-        //  await post.save();
-        //}
-      } catch (error) {
-        console.error(error);
-      }
-    }
+  if (post == undefined) {
+    post = await Post.create({ link, body: hash });
+  }
 
-    if (post.cyber == undefined) {
-      try {
-        //let data = await cyber.createPost({ title, body: description });
-        //if (data != undefined) {
-        //  post.cyber = JSON.stringify(data);
-        //  await post.save();
-        //}
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    count--;
-    if (count == 0) return;
+  try {
+    await fun(post, { title, body });
+  } catch (error) {
+    console.error(error);
   }
 };
 
-const start = async () => {
-  const Post = store.Post;
-
-  //setInterval(cycle(Post), 5 * 60 * 1000);
-  cycle(Post)();
+const golosClassic = async (post, params) => {
+  if (post.golos_classic == undefined) {
+    let data = await golos.createPost(params);
+    if (data != undefined) {
+      post.golos_classic = JSON.stringify(data);
+      await post.save();
+    }
+  }
 };
 
-connect().then(start); //.catch(disconnect);
+const steemit = async (post, params) => {
+  if (post.steem == undefined) {
+    let data = await steem.createPost(params);
+    if (data != undefined) {
+      post.steem = JSON.stringify(data);
+      await post.save();
+    }
+  }
+};
+
+const cyberway = async (post, params) => {
+  if (post.cyber == undefined) {
+    let data = await cyber.createPost(params);
+    if (data != undefined) {
+      post.cyber = JSON.stringify(data);
+      await post.save();
+    }
+  }
+};
+
+connect().then(() => {
+  setInterval(cycle(golosClassic), 12 * 60 * 60 * 1000);
+  setInterval(cycle(steemit), 10 * 60 * 60 * 1000);
+  //setInterval(cycle(cyberway), 12 * 60 * 60 * 1000);
+});
+
+process.on("uncaughtException", function (err) {
+  console.log(err);
+});
